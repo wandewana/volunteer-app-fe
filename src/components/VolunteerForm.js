@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { registrations } from '../data/data';
 import './VolunteerForm.css';
 
 const VolunteerForm = ({ event, onClose }) => {
@@ -18,15 +19,24 @@ const VolunteerForm = ({ event, onClose }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // In a real app, this would submit to a backend
-    console.log('Form submitted for event:', event.title, '\nVolunteer data:', formData);
-    alert(`Thank you for signing up for ${event.title}!`);
-    onClose();
-    setFormData({
-      name: '',
-      email: '',
-      phone: ''
-    });
+    try {
+      const registration = createVolunteerRegistration(event.id, {
+        ...formData,
+        date: new Date().toISOString()
+      });
+      
+      console.log('Registration created:', registration);
+      alert(`Thank you for signing up for ${event.title}!`);
+      onClose();
+      setFormData({
+        name: '',
+        email: '',
+        phone: ''
+      });
+    } catch (error) {
+      console.error('Error creating registration:', error);
+      alert('There was an error submitting your registration. Please try again.');
+    }
   };
 
   return (
@@ -34,9 +44,10 @@ const VolunteerForm = ({ event, onClose }) => {
       <button className="close-btn" onClick={onClose}>×</button>
       <h2>Volunteer for {event.title}</h2>
       <p className="event-info">
-        <strong>Date:</strong> {event.date}<br />
-        <strong>Time:</strong> {event.time}<br />
-        <strong>Location:</strong> {event.location}
+        <strong>Date:</strong> {new Date(event.date).toLocaleDateString()}<br />
+        <strong>Time:</strong> {event.time.replace(/-/g, ' - ')}<br />
+        <strong>Location:</strong> {event.location.name}<br />
+        <strong>Requirements:</strong> {event.requirements.join(', ')}
       </p>
       <form onSubmit={handleSubmit}>
         <div className="form-group">
